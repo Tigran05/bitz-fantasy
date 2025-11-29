@@ -1,0 +1,13 @@
+[
+null,
+{"id":1,"expanded":true,"name":"Мир 1","order":1,"parentId":0,"scrollX":1920,"scrollY":693},
+{"id":2,"expanded":true,"name":"Битцленд","order":2,"parentId":1,"scrollX":1081.3333333333333,"scrollY":972},
+{"id":3,"expanded":true,"name":"Вермилион","order":10,"parentId":1,"scrollX":1081.3333333333333,"scrollY":685.3333333333334},
+{"id":4,"expanded":false,"name":"Оружейный магазин","order":3,"parentId":2,"scrollX":1092,"scrollY":609.3333333333334},
+{"id":5,"expanded":false,"name":"Магазин брони","order":4,"parentId":2,"scrollX":832,"scrollY":640},
+{"id":6,"expanded":false,"name":"Магазин","order":5,"parentId":2,"scrollX":1092,"scrollY":609.3333333333334},
+{"id":7,"expanded":false,"name":"Казино","order":6,"parentId":2,"scrollX":1216.5,"scrollY":1234.5},
+{"id":8,"expanded":false,"name":"бар кат сцена","order":7,"parentId":2,"scrollX":1081.3333333333333,"scrollY":1310.6666666666667},
+{"id":9,"expanded":true,"name":"Дом брунно","order":8,"parentId":2,"scrollX":1228.5,"scrollY":685.5},
+{"id":10,"expanded":false,"name":"Полуразрушенный дом","order":9,"parentId":9,"scrollX":1092,"scrollY":609.3333333333334}
+]
