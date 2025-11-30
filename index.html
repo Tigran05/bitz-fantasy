@@ -11,49 +11,6 @@
     <link rel="apple-touch-icon" href="icon/icon.png">
     <link rel="stylesheet" type="text/css" href="fonts/gamefont.css">
     <link rel="stylesheet" type="text/css" href="css/telegram-webapp.css">
-    
-    <!-- Стили для предотвращения проблем с изменением ориентации -->
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: black;
-            touch-action: none;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-        
-        /* Предотвращаем зум при повороте */
-        html, body {
-            -webkit-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-        }
-        
-        /* Обеспечиваем полный размер экрана */
-        #gameCanvas, canvas {
-            display: block;
-            width: 100vw !important;
-            height: 100vh !important;
-            max-width: 100% !important;
-            max-height: 100% !important;
-        }
-        
-        /* Стабилизация во время изменения ориентации */
-        @media screen and (orientation: portrait) {
-            body {
-                transform: rotate(0deg);
-            }
-        }
-        
-        @media screen and (orientation: landscape) {
-            body {
-                transform: rotate(0deg);
-            }
-        }
-    </style>
-    
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <title>Bitz Fantasy</title>
 </head>
@@ -72,7 +29,6 @@
     <script type="text/javascript" src="js/rpg_sprites.js"></script>
     <script type="text/javascript" src="js/rpg_windows.js"></script>
     <script type="text/javascript" src="js/plugins.js"></script>
-<<<<<<< HEAD
     <script type="text/javascript" src="js/main.js"></script>
     <script type="text/javascript">
         // Инициализация Telegram Web App
@@ -93,11 +49,6 @@
             tg.ready();
         }
     </script>
-=======
-    <!-- Telegram Web App Initialization -->
-    <script type="text/javascript" src="js/telegram-init.js"></script>
-    <script type="text/javascript" src="js/main.js"></script>
->>>>>>> parent of a31d508 (Add fullscreen styles)
 </body>
 
 </html>
