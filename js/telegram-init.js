@@ -131,98 +131,61 @@
         // Функция обработки изменения ориентации
         function handleOrientationChange() {
             try {
-                // Проверяем, что Graphics инициализирован и игра загружена
-                if (typeof Graphics !== 'undefined' && Graphics._width && Graphics._height) {
+                // Обновляем размеры Graphics для нового viewport
+                if (typeof Graphics !== 'undefined') {
                     // Получаем новые размеры экрана
                     var screenWidth = tg.viewportWidth || window.innerWidth;
                     var screenHeight = tg.viewportHeight || window.innerHeight;
                     
-                    // Проверяем, что размеры действительно изменились
-                    if (Math.abs(Graphics._width - screenWidth) > 10 || 
-                        Math.abs(Graphics._height - screenHeight) > 10) {
-                        
-                        console.log('Orientation changed, updating sizes...');
-                        
-                        // Обновляем размеры экрана
-                        Graphics._width = screenWidth;
-                        Graphics._height = screenHeight;
-                        
-                        // Обновляем размеры box (игровая область)
-                        Graphics.boxWidth = Math.floor(screenWidth * 0.8);
-                        Graphics.boxHeight = Math.floor(screenHeight * 0.8);
-                        
-                        // Центрируем игровую область
-                        Graphics.boxX = Math.floor((screenWidth - Graphics.boxWidth) / 2);
-                        Graphics.boxY = Math.floor((screenHeight - Graphics.boxHeight) / 2);
-                        
-                        // Перерисовываем все окна только если сцена существует
-                        if (typeof SceneManager !== 'undefined' && 
-                            SceneManager._scene && 
-                            SceneManager._scene._windowLayer && 
-                            SceneManager._scene._windowLayer.children) {
-                            
-                            SceneManager._scene._windowLayer.children.forEach(function(window) {
-                                if (typeof window.move === 'function') {
-                                    // Перепозиционируем окна
-                                    var newX = (Graphics.boxWidth - window.width) / 2;
-                                    var newY = (Graphics.boxHeight - window.height) / 2;
-                                    window.move(newX, newY, window.width, window.height);
-                                }
-                            });
-                        }
-                        
-                        // Обновляем размеры renderer если есть
-                        if (Graphics._renderer && typeof Graphics._renderer.resize === 'function') {
-                            Graphics._renderer.resize(screenWidth, screenHeight);
-                        }
-                        
-                        console.log('Screen resized to:', screenWidth, 'x', screenHeight);
-                        console.log('Game box:', Graphics.boxWidth, 'x', Graphics.boxHeight);
+                    // Обновляем размеры экрана
+                    Graphics._width = screenWidth;
+                    Graphics._height = screenHeight;
+                    
+                    // Обновляем размеры box (игровая область)
+                    Graphics.boxWidth = Math.floor(screenWidth * 0.8);
+                    Graphics.boxHeight = Math.floor(screenHeight * 0.8);
+                    
+                    // Центрируем игровую область
+                    Graphics.boxX = Math.floor((screenWidth - Graphics.boxWidth) / 2);
+                    Graphics.boxY = Math.floor((screenHeight - Graphics.boxHeight) / 2);
+                    
+                    // Перерисовываем все окна
+                    if (typeof SceneManager !== 'undefined' && SceneManager._scene) {
+                        SceneManager._scene._windowLayer.children.forEach(function(window) {
+                            if (typeof window.move === 'function') {
+                                // Перепозиционируем окна
+                                var newX = (Graphics.boxWidth - window.width) / 2;
+                                var newY = (Graphics.boxHeight - window.height) / 2;
+                                window.move(newX, newY, window.width, window.height);
+                            }
+                        });
                     }
-                } else {
-                    console.log('Graphics not yet initialized, skipping orientation change');
+                    
+                    // Обновляем размеры renderer если есть
+                    if (Graphics._renderer && typeof Graphics._renderer.resize === 'function') {
+                        Graphics._renderer.resize(screenWidth, screenHeight);
+                    }
+                    
+                    console.log('Screen resized to:', screenWidth, 'x', screenHeight);
+                    console.log('Game box:', Graphics.boxWidth, 'x', Graphics.boxHeight);
                 }
             } catch (error) {
                 console.error('Error handling orientation change:', error);
             }
         }
 
-        // Флаг для отслеживания инициализации игры
-        var gameInitialized = false;
-        
-        // Функция для отметки игры как инициализированной
-        function markGameInitialized() {
-            gameInitialized = true;
-            console.log('Game marked as initialized, orientation handlers activated');
-        }
-        
-        // Добавляем обработчик инициализации игры
-        if (typeof SceneManager !== 'undefined') {
-            var originalGoto = SceneManager.goto;
-            SceneManager.goto = function(sceneClass) {
-                if (!gameInitialized && sceneClass) {
-                    markGameInitialized();
-                }
-                return originalGoto.call(this, sceneClass);
-            };
-        }
-
-        // Также добавляем обработчик изменения размера окна (только после инициализации)
+        // Также добавляем стандартный обработчик изменения размера окна
         window.addEventListener('resize', function() {
-            if (gameInitialized) {
-                setTimeout(function() {
-                    handleOrientationChange();
-                }, 100);
-            }
+            setTimeout(function() {
+                handleOrientationChange();
+            }, 100);
         });
 
-        // Обработчик изменения ориентации для iOS (только после инициализации)
+        // Обработчик изменения ориентации для iOS
         window.addEventListener('orientationchange', function() {
-            if (gameInitialized) {
-                setTimeout(function() {
-                    handleOrientationChange();
-                }, 200); // iOS требует больше времени для стабилизации
-            }
+            setTimeout(function() {
+                handleOrientationChange();
+            }, 200); // iOS требует больше времени для стабилизации
         });
         
         // Уведомляем пользователя о готовности

@@ -1908,6 +1908,39 @@ SceneManager.update = function() {
         this.tickEnd();
     } catch (e) {
         console.error('Error in SceneManager.update():', e);
+        
+        // Проверяем, связана ли ошибка с изменением размеров
+        var message = e.message || '';
+        if (message.includes('viewport') || 
+            message.includes('resize') || 
+            message.includes('orientation') ||
+            message.includes('Graphics') ||
+            message.includes('canvas')) {
+            
+            console.log('Viewport/graphics error in update cycle, attempting recovery...');
+            
+            try {
+                // Пытаемся восстановить размеры
+                if (typeof Graphics !== 'undefined') {
+                    var recoveryWidth = window.innerWidth || 816;
+                    var recoveryHeight = window.innerHeight || 624;
+                    
+                    Graphics._width = recoveryWidth;
+                    Graphics._height = recoveryHeight;
+                    Graphics.boxWidth = Math.floor(recoveryWidth * 0.8);
+                    Graphics.boxHeight = Math.floor(recoveryHeight * 0.8);
+                    
+                    console.log('Recovered Graphics in update cycle');
+                }
+                
+                // Продолжаем работу без остановки при восстановимых ошибках
+                this.requestUpdate(); // Продолжаем цикл обновления
+                return;
+            } catch (recoveryError) {
+                console.error('Recovery failed:', recoveryError);
+            }
+        }
+        
         this.catchException(e);
     }
 };
@@ -1919,9 +1952,41 @@ SceneManager.terminate = function() {
 SceneManager.onError = function(e) {
     console.error('Global error caught:', e.message);
     console.error('File:', e.filename, 'Line:', e.lineno);
+    console.error('Stack:', e.error ? e.error.stack : 'No stack trace');
     
     try {
         this.stop();
+        
+        // Специальная обработка ошибок изменения ориентации
+        var errorMessage = e.message || 'Unknown error';
+        if (errorMessage.includes('viewport') || 
+            errorMessage.includes('resize') || 
+            errorMessage.includes('orientation') ||
+            errorMessage.includes('Graphics')) {
+            
+            console.log('Detected viewport/orientation related error, attempting recovery...');
+            
+            // Пытаемся восстановить размеры экрана
+            if (typeof Graphics !== 'undefined') {
+                var recoveryWidth = window.innerWidth || 816;
+                var recoveryHeight = window.innerHeight || 624;
+                
+                Graphics._width = recoveryWidth;
+                Graphics._height = recoveryHeight;
+                Graphics.boxWidth = Math.floor(recoveryWidth * 0.8);
+                Graphics.boxHeight = Math.floor(recoveryHeight * 0.8);
+                
+                console.log('Recovered screen dimensions:', recoveryWidth, 'x', recoveryHeight);
+            }
+            
+            // Не показываем ошибку пользователю при проблемах с ориентацией
+            if (errorMessage.includes('viewport') || errorMessage.includes('orientation')) {
+                console.log('Orientation error recovered silently');
+                this.resume();
+                return;
+            }
+        }
+        
         Graphics.printError('Error', e.message);
         AudioManager.stopAll();
     } catch (e2) {
@@ -1947,14 +2012,68 @@ SceneManager.onKeyDown = function(event) {
 };
 
 SceneManager.catchException = function(e) {
-    if (e instanceof Error) {
-        Graphics.printError(e.name, e.message);
-        console.error(e.stack);
-    } else {
-        Graphics.printError('UnknownError', e);
+    console.error('Exception caught in SceneManager:', e);
+    
+    try {
+        if (e instanceof Error) {
+            console.error('Error name:', e.name);
+            console.error('Error message:', e.message);
+            console.error('Error stack:', e.stack);
+            
+            // Проверяем, связана ли ошибка с изменением размеров
+            var message = e.message || '';
+            if (message.includes('viewport') || 
+                message.includes('resize') || 
+                message.includes('orientation') ||
+                message.includes('Graphics') ||
+                message.includes('canvas')) {
+                
+                console.log('Detected graphics/viewport exception, attempting recovery...');
+                
+                // Пытаемся восстановить после ошибки графики
+                if (typeof Graphics !== 'undefined') {
+                    try {
+                        var recoveryWidth = window.innerWidth || 816;
+                        var recoveryHeight = window.innerHeight || 624;
+                        
+                        Graphics._width = recoveryWidth;
+                        Graphics._height = recoveryHeight;
+                        Graphics.boxWidth = Math.floor(recoveryWidth * 0.8);
+                        Graphics.boxHeight = Math.floor(recoveryHeight * 0.8);
+                        
+                        console.log('Graphics recovered after exception');
+                    } catch (graphicsError) {
+                        console.error('Failed to recover Graphics:', graphicsError);
+                    }
+                }
+                
+                // При ошибках графики пытаемся продолжить работу
+                if (message.includes('Graphics') || message.includes('canvas')) {
+                    console.log('Graphics exception recovered, continuing...');
+                    return; // Не останавливаем игру при восстановимых ошибках графики
+                }
+            }
+            
+            Graphics.printError(e.name, e.message);
+        } else {
+            console.error('Non-Error exception:', e);
+            Graphics.printError('UnknownError', String(e));
+        }
+    } catch (handlerError) {
+        console.error('Error in exception handler:', handlerError);
     }
-    AudioManager.stopAll();
-    this.stop();
+    
+    try {
+        AudioManager.stopAll();
+    } catch (audioError) {
+        console.error('Error stopping audio:', audioError);
+    }
+    
+    try {
+        this.stop();
+    } catch (stopError) {
+        console.error('Error stopping SceneManager:', stopError);
+    }
 };
 
 SceneManager.tickStart = function() {
