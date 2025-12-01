@@ -1,5 +1,3 @@
-// Гарантируем, что объект Yanfly определён
-var Yanfly = window.Yanfly = window.Yanfly || {};
 //=============================================================================
 // AnimatedEnemiesYanflyCompatability.js
 // Version: 1.016

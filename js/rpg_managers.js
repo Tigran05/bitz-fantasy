@@ -1,26 +1,3 @@
-// Глобальное логирование ошибок для мобильных и WebView
-if (typeof window !== 'undefined') {
-    window.onerror = function(message, source, lineno, colno, error) {
-        var msg = '[window.onerror] ' + message + '<br>' + (source || '') + ':' + lineno + ':' + colno;
-        if (error && error.stack) {
-            msg += '<br>Stack: ' + error.stack;
-        }
-        if (typeof showMobileLogOverlay === 'function') {
-            showMobileLogOverlay(msg);
-        }
-        return false; // Не подавлять стандартное поведение
-    };
-    window.onunhandledrejection = function(event) {
-        var msg = '[unhandledrejection] ' + (event.reason && event.reason.message ? event.reason.message : event.reason);
-        if (event.reason && event.reason.stack) {
-            msg += '<br>Stack: ' + event.reason.stack;
-        }
-        if (typeof showMobileLogOverlay === 'function') {
-            showMobileLogOverlay(msg);
-        }
-        return false;
-    };
-}
 //=============================================================================
 // rpg_managers.js v1.6.2
 //=============================================================================
@@ -1938,45 +1915,14 @@ SceneManager.terminate = function() {
     window.close();
 };
 
-
-// Overlay для логов и ошибок
-window._mobileLogOverlay = null;
-function showMobileLogOverlay(msg) {
-    if (!window._mobileLogOverlay) {
-        var overlay = document.createElement('div');
-        overlay.id = 'MobileLogOverlay';
-        overlay.style.position = 'fixed';
-        overlay.style.top = '0';
-        overlay.style.left = '0';
-        overlay.style.width = '100vw';
-        overlay.style.maxHeight = '60vh';
-        overlay.style.overflowY = 'auto';
-        overlay.style.background = 'rgba(0,0,0,0.8)';
-        overlay.style.color = '#fff';
-        overlay.style.zIndex = '9999';
-        overlay.style.fontSize = '14px';
-        overlay.style.padding = '10px';
-        overlay.style.wordBreak = 'break-all';
-        overlay.style.pointerEvents = 'auto';
-        overlay.onclick = function() { overlay.style.display = 'none'; };
-        document.body.appendChild(overlay);
-        window._mobileLogOverlay = overlay;
-    }
-    window._mobileLogOverlay.style.display = 'block';
-    window._mobileLogOverlay.innerHTML += '<div>' + msg + '</div>';
-}
-
 SceneManager.onError = function(e) {
-    var msg = '[ERROR] ' + e.message + '<br>' + e.filename + ':' + e.lineno;
     console.error(e.message);
     console.error(e.filename, e.lineno);
-    showMobileLogOverlay(msg);
     try {
         this.stop();
         Graphics.printError('Error', e.message);
         AudioManager.stopAll();
     } catch (e2) {
-        showMobileLogOverlay('[ERROR2] ' + (e2 && e2.message ? e2.message : e2));
     }
 };
 
@@ -2001,10 +1947,8 @@ SceneManager.catchException = function(e) {
     if (e instanceof Error) {
         Graphics.printError(e.name, e.message);
         console.error(e.stack);
-        showMobileLogOverlay('[EXCEPTION] ' + e.name + ': ' + e.message + '<br>' + (e.stack || ''));
     } else {
         Graphics.printError('UnknownError', e);
-        showMobileLogOverlay('[EXCEPTION] UnknownError: ' + e);
     }
     AudioManager.stopAll();
     this.stop();
