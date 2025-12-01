@@ -2502,7 +2502,7 @@ Graphics._createVideo = function () {
     this._video.setAttribute('playsinline', '');
     this._video.volume = this._videoVolume;
     this._updateVideo();
-    makeVideoPlayableInline(this._video);
+    // makeVideoPlayableInline(this._video);
     document.body.appendChild(this._video);
 };
 
