@@ -1,3 +1,26 @@
+// Глобальное логирование ошибок для мобильных и WebView
+if (typeof window !== 'undefined') {
+    window.onerror = function(message, source, lineno, colno, error) {
+        var msg = '[window.onerror] ' + message + '<br>' + (source || '') + ':' + lineno + ':' + colno;
+        if (error && error.stack) {
+            msg += '<br>Stack: ' + error.stack;
+        }
+        if (typeof showMobileLogOverlay === 'function') {
+            showMobileLogOverlay(msg);
+        }
+        return false; // Не подавлять стандартное поведение
+    };
+    window.onunhandledrejection = function(event) {
+        var msg = '[unhandledrejection] ' + (event.reason && event.reason.message ? event.reason.message : event.reason);
+        if (event.reason && event.reason.stack) {
+            msg += '<br>Stack: ' + event.reason.stack;
+        }
+        if (typeof showMobileLogOverlay === 'function') {
+            showMobileLogOverlay(msg);
+        }
+        return false;
+    };
+}
 //=============================================================================
 // rpg_managers.js v1.6.2
 //=============================================================================
