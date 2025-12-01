@@ -29,8 +29,13 @@
 
             // Handle rotation/resize events from Telegram
             tg.onEvent('viewportChanged', function () {
-                if (Graphics && Graphics._onWindowResize) {
-                    Graphics._onWindowResize();
+                try {
+                    if (Graphics && Graphics._onWindowResize) {
+                        Graphics._onWindowResize();
+                    }
+                } catch (e) {
+                    console.error("Telegram viewportChanged error:", e);
+                    if (window.logError) window.logError("Viewport Error: " + e.message);
                 }
             });
 
@@ -91,17 +96,22 @@
         document.body.appendChild(overlay);
 
         var checkOrientation = function () {
-            // Check if portrait
-            if (window.innerHeight > window.innerWidth) {
-                overlay.style.display = 'flex';
-            } else {
-                overlay.style.display = 'none';
-                // Try to lock orientation if supported and in landscape
-                if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock('landscape').catch(function (err) {
-                        // Lock failed (not supported or denied), just ignore
-                    });
+            try {
+                // Check if portrait
+                if (window.innerHeight > window.innerWidth) {
+                    overlay.style.display = 'flex';
+                } else {
+                    overlay.style.display = 'none';
+                    // Try to lock orientation if supported and in landscape
+                    if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock('landscape').catch(function (err) {
+                            // Lock failed (not supported or denied), just ignore
+                        });
+                    }
                 }
+            } catch (e) {
+                console.error("checkOrientation error:", e);
+                if (window.logError) window.logError("Orientation Error: " + e.message);
             }
         };
 
@@ -109,12 +119,30 @@
         checkOrientation();
 
         // Listen for resize and orientation changes
-        window.addEventListener('resize', checkOrientation);
-        window.addEventListener('orientationchange', checkOrientation);
+        window.addEventListener('resize', function () {
+            try {
+                checkOrientation();
+            } catch (e) {
+                if (window.logError) window.logError("Resize Error: " + e.message);
+            }
+        });
+        window.addEventListener('orientationchange', function () {
+            try {
+                checkOrientation();
+            } catch (e) {
+                if (window.logError) window.logError("OrientationChange Error: " + e.message);
+            }
+        });
 
         // Also listen to Telegram viewport changes
         if ($gameTemp.tg) {
-            $gameTemp.tg.onEvent('viewportChanged', checkOrientation);
+            $gameTemp.tg.onEvent('viewportChanged', function () {
+                try {
+                    checkOrientation();
+                } catch (e) {
+                    if (window.logError) window.logError("TG Viewport Error: " + e.message);
+                }
+            });
         }
     };
 })();
