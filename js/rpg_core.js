@@ -2755,7 +2755,10 @@ Graphics._applyCanvasFilter = function () {
  * @private
  */
 Graphics._onVideoLoad = function () {
-    this._video.play();
+    var p = this._video.play();
+    if (p && typeof p.catch === 'function') {
+        p.catch(function (e) { console.warn("Video play failed:", e); });
+    }
     this._updateVisibility(true);
     this._videoLoading = false;
 };
@@ -2862,11 +2865,17 @@ Graphics._onKeyDown = function (event) {
  */
 Graphics._onTouchEnd = function (event) {
     if (!this._videoUnlocked) {
-        this._video.play();
+        var p = this._video.play();
+        if (p && typeof p.catch === 'function') {
+            p.catch(function (e) { console.warn("Video play failed:", e); });
+        }
         this._videoUnlocked = true;
     }
     if (this._isVideoVisible() && this._video.paused) {
-        this._video.play();
+        var p = this._video.play();
+        if (p && typeof p.catch === 'function') {
+            p.catch(function (e) { console.warn("Video play failed:", e); });
+        }
     }
 };
 
@@ -8852,7 +8861,10 @@ Html5Audio._startPlaying = function (loop, offset) {
     if (this._audioElement) {
         this._audioElement.volume = this._volume;
         this._audioElement.currentTime = offset;
-        this._audioElement.play();
+        var p = this._audioElement.play();
+        if (p && typeof p.catch === 'function') {
+            p.catch(function (e) { console.warn("Html5Audio play failed:", e); });
+        }
     }
 };
 
