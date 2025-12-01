@@ -27,6 +27,13 @@
             // Expand to full screen
             tg.expand();
 
+            // Handle rotation/resize events from Telegram
+            tg.onEvent('viewportChanged', function () {
+                if (Graphics && Graphics._onWindowResize) {
+                    Graphics._onWindowResize();
+                }
+            });
+
             // Disable vertical swipes
             if (tg.disableVerticalSwipes) {
                 tg.disableVerticalSwipes();
