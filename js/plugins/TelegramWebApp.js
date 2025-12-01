@@ -47,10 +47,74 @@
                 tg.setBackgroundColor('#000000');
             }
 
+            // Force Landscape Mode
+            this.forceLandscapeMode();
+
             // Notify Telegram that the app is ready
             tg.ready();
 
             console.log("Telegram Web App initialized");
+        }
+    };
+
+    Scene_Boot.prototype.forceLandscapeMode = function () {
+        // Create overlay element
+        var overlay = document.createElement('div');
+        overlay.id = 'orientation-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = '#000000';
+        overlay.style.zIndex = '999999';
+        overlay.style.display = 'none'; // Hidden by default
+        overlay.style.flexDirection = 'column';
+        overlay.style.justifyContent = 'center';
+        overlay.style.alignItems = 'center';
+        overlay.style.color = '#ffffff';
+        overlay.style.fontFamily = 'Arial, sans-serif';
+        overlay.style.textAlign = 'center';
+
+        // Add icon and text
+        var icon = document.createElement('div');
+        icon.innerHTML = '&#8635;'; // Rotate icon
+        icon.style.fontSize = '50px';
+        icon.style.marginBottom = '20px';
+
+        var text = document.createElement('div');
+        text.innerText = 'Пожалуйста, поверните устройство\nв горизонтальное положение';
+        text.style.fontSize = '20px';
+
+        overlay.appendChild(icon);
+        overlay.appendChild(text);
+        document.body.appendChild(overlay);
+
+        var checkOrientation = function () {
+            // Check if portrait
+            if (window.innerHeight > window.innerWidth) {
+                overlay.style.display = 'flex';
+            } else {
+                overlay.style.display = 'none';
+                // Try to lock orientation if supported and in landscape
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(function (err) {
+                        // Lock failed (not supported or denied), just ignore
+                    });
+                }
+            }
+        };
+
+        // Initial check
+        checkOrientation();
+
+        // Listen for resize and orientation changes
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', checkOrientation);
+
+        // Also listen to Telegram viewport changes
+        if ($gameTemp.tg) {
+            $gameTemp.tg.onEvent('viewportChanged', checkOrientation);
         }
     };
 })();
