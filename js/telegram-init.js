@@ -1,39 +1,39 @@
 // Telegram Web App Integration Script
 // Инициализация Telegram Web App для RPG Maker MV
 
-(function() {
+(function () {
     'use strict';
-    
+
     // Проверяем, что скрипт запущен в Telegram Web App
     if (window.Telegram && window.Telegram.WebApp) {
         const tg = window.Telegram.WebApp;
-        
+
         // Расширяем приложение на весь экран
         tg.expand();
-        
+
         // Включаем режим закрепления (предотвращает случайное закрытие)
         tg.enableClosingConfirmation();
-        
-        // Устанавливаем цвет заголовка под тему Telegram
-        tg.setHeaderColor('bg_color');
-        
+
+        // Устанавливаем цвет заголовка - делаем его темным как фон игры
+        tg.setHeaderColor('secondary_bg_color');
+
         // Устанавливаем цвет фона под тему Telegram
         tg.setBackgroundColor('bg_color');
-        
+
         // Готовим приложение к показу
         tg.ready();
-        
+
         console.log('Telegram Web App initialized');
         console.log('User ID:', tg.initDataUnsafe?.user?.id);
         console.log('Platform:', tg.platform);
-        
+
         // Облачное хранилище для сохранений
         window.TelegramCloudStorage = {
             // Сохранить данные в облако Telegram
-            save: function(key, value, callback) {
+            save: function (key, value, callback) {
                 if (tg.CloudStorage) {
                     const dataStr = typeof value === 'string' ? value : JSON.stringify(value);
-                    tg.CloudStorage.setItem(key, dataStr, function(error, success) {
+                    tg.CloudStorage.setItem(key, dataStr, function (error, success) {
                         if (error) {
                             console.error('Cloud save error:', error);
                             if (callback) callback(false, error);
@@ -47,11 +47,11 @@
                     if (callback) callback(false, 'Cloud Storage not available');
                 }
             },
-            
+
             // Загрузить данные из облака Telegram
-            load: function(key, callback) {
+            load: function (key, callback) {
                 if (tg.CloudStorage) {
-                    tg.CloudStorage.getItem(key, function(error, value) {
+                    tg.CloudStorage.getItem(key, function (error, value) {
                         if (error) {
                             console.error('Cloud load error:', error);
                             if (callback) callback(null, error);
@@ -70,11 +70,11 @@
                     if (callback) callback(null, 'Cloud Storage not available');
                 }
             },
-            
+
             // Удалить данные из облака
-            remove: function(key, callback) {
+            remove: function (key, callback) {
                 if (tg.CloudStorage) {
-                    tg.CloudStorage.removeItem(key, function(error, success) {
+                    tg.CloudStorage.removeItem(key, function (error, success) {
                         if (error) {
                             console.error('Cloud remove error:', error);
                             if (callback) callback(false, error);
@@ -88,11 +88,11 @@
                     if (callback) callback(false, 'Cloud Storage not available');
                 }
             },
-            
+
             // Получить все ключи
-            getKeys: function(callback) {
+            getKeys: function (callback) {
                 if (tg.CloudStorage) {
-                    tg.CloudStorage.getKeys(function(error, keys) {
+                    tg.CloudStorage.getKeys(function (error, keys) {
                         if (error) {
                             console.error('Cloud getKeys error:', error);
                             if (callback) callback([], error);
@@ -107,7 +107,7 @@
                 }
             }
         };
-        
+
         // Получаем информацию о пользователе Telegram
         window.TelegramUser = {
             id: tg.initDataUnsafe?.user?.id || null,
@@ -117,19 +117,12 @@
             languageCode: tg.initDataUnsafe?.user?.language_code || 'en',
             isPremium: tg.initDataUnsafe?.user?.is_premium || false
         };
-        
+
         // Обработчик события закрытия приложения
-        tg.onEvent('viewportChanged', function() {
+        tg.onEvent('viewportChanged', function () {
             console.log('Viewport changed:', tg.viewportHeight, tg.viewportStableHeight);
         });
-        
-        // Уведомляем пользователя о готовности
-        tg.showPopup({
-            title: 'Bitz Fantasy',
-            message: 'Игра загружена! Приятной игры!',
-            buttons: [{type: 'ok'}]
-        });
-        
+
     } else {
         console.warn('Not running in Telegram Web App');
         // Если не в Telegram, показываем предупреждение
