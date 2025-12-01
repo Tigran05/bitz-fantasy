@@ -30,8 +30,11 @@
             // Handle rotation/resize events from Telegram
             tg.onEvent('viewportChanged', function () {
                 try {
-                    if (Graphics && Graphics._onWindowResize) {
-                        Graphics._onWindowResize();
+                    // Only resize if we are NOT in portrait mode (width > height)
+                    if (window.innerWidth >= window.innerHeight) {
+                        if (Graphics && Graphics._onWindowResize) {
+                            Graphics._onWindowResize();
+                        }
                     }
                 } catch (e) {
                     console.error("Telegram viewportChanged error:", e);
@@ -95,13 +98,31 @@
         overlay.appendChild(text);
         document.body.appendChild(overlay);
 
+        var wasPortrait = false;
         var checkOrientation = function () {
             try {
                 // Check if portrait
                 if (window.innerHeight > window.innerWidth) {
                     overlay.style.display = 'flex';
+                    if (!wasPortrait) {
+                        wasPortrait = true;
+                        if (SceneManager && SceneManager.stop) {
+                            console.log("Pausing game due to portrait mode");
+                            SceneManager.stop();
+                        }
+                        if (AudioManager && AudioManager.stopAll) {
+                            AudioManager.stopAll();
+                        }
+                    }
                 } else {
                     overlay.style.display = 'none';
+                    if (wasPortrait) {
+                        wasPortrait = false;
+                        if (SceneManager && SceneManager.resume) {
+                            console.log("Resuming game due to landscape mode");
+                            SceneManager.resume();
+                        }
+                    }
                     // Try to lock orientation if supported and in landscape
                     if (screen.orientation && screen.orientation.lock) {
                         screen.orientation.lock('landscape').catch(function (err) {
