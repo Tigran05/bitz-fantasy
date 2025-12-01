@@ -388,65 +388,94 @@ Sprite_EnemySV.prototype.startEffect = function (effectType) {
 Sprite_EnemySV.prototype.createShadow = function () {
     if (this._shadowSprite) return;
 
-    this._shadowSprite = new Sprite();
-    this._shadowSprite.bitmap = new Bitmap(80, 24);
-    this._shadowSprite.anchor.x = 0.5;
-    this._shadowSprite.anchor.y = 0.5;
-    this._shadowSprite.opacity = 100;
-    this._shadowSprite.y = 40;
+    try {
+        this._shadowSprite = new Sprite();
+        this._shadowSprite.bitmap = new Bitmap(80, 24);
+        this._shadowSprite.anchor.x = 0.5;
+        this._shadowSprite.anchor.y = 0.5;
+        this._shadowSprite.opacity = 100;
+        this._shadowSprite.y = 40;
 
-    var bitmap = this._shadowSprite.bitmap;
-    var context = bitmap._context;
-    var gradient = context.createRadialGradient(40, 12, 0, 40, 12, 40);
-    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, 80, 24);
-    bitmap._setDirty();
+        var bitmap = this._shadowSprite.bitmap;
+        if (!bitmap || !bitmap._context) {
+            console.warn('[ACTPO-EA] Shadow bitmap context not ready');
+            return;
+        }
 
-    this.addChild(this._shadowSprite);
+        var context = bitmap._context;
+        var gradient = context.createRadialGradient(40, 12, 0, 40, 12, 40);
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, 80, 24);
+        bitmap._setDirty();
+
+        this.addChild(this._shadowSprite);
+    } catch (e) {
+        console.error('[ACTPO-EA] Error creating shadow:', e);
+        this._shadowSprite = null;
+    }
 };
 
 // Аура
 Sprite_EnemySV.prototype.createAura = function () {
     if (this._auraSprite) return;
 
-    this._auraSprite = new Sprite();
-    this._auraSprite.bitmap = new Bitmap(240, 240);
-    this._auraSprite.anchor.x = 0.5;
-    this._auraSprite.anchor.y = 0.5;
-    this._auraSprite.blendMode = 1;
-    this._auraSprite.opacity = 120;
+    try {
+        this._auraSprite = new Sprite();
+        this._auraSprite.bitmap = new Bitmap(240, 240);
+        this._auraSprite.anchor.x = 0.5;
+        this._auraSprite.anchor.y = 0.5;
+        this._auraSprite.blendMode = 1;
+        this._auraSprite.opacity = 120;
 
-    var bitmap = this._auraSprite.bitmap;
-    var centerX = 120;
-    var centerY = 120;
-    var color = [255, 50, 50]; // Красный
-
-    for (var i = 0; i < 3; i++) {
-        var radius = 100 - i * 20;
-        for (var r = radius; r > 0; r -= 3) {
-            var alpha = (1 - r / radius) * 0.2;
-            var colorStr = 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ',' + alpha + ')';
-            bitmap.drawCircle(centerX, centerY, r, colorStr);
+        var bitmap = this._auraSprite.bitmap;
+        if (!bitmap || !bitmap._context) {
+            console.warn('[ACTPO-EA] Aura bitmap context not ready');
+            return;
         }
-    }
 
-    this.addChild(this._auraSprite);
-    this._auraFrame = 0;
+        var centerX = 120;
+        var centerY = 120;
+        var color = [255, 50, 50]; // Красный
+
+        for (var i = 0; i < 3; i++) {
+            var radius = 100 - i * 20;
+            for (var r = radius; r > 0; r -= 3) {
+                var alpha = (1 - r / radius) * 0.2;
+                var colorStr = 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ',' + alpha + ')';
+                bitmap.drawCircle(centerX, centerY, r, colorStr);
+            }
+        }
+
+        this.addChild(this._auraSprite);
+        this._auraFrame = 0;
+    } catch (e) {
+        console.error('[ACTPO-EA] Error creating aura:', e);
+        this._auraSprite = null;
+    }
 };
 
 ACTPO.EA.Sprite_EnemySV_update = Sprite_EnemySV.prototype.update;
 Sprite_EnemySV.prototype.update = function () {
-    Sprite_Actor.prototype.update.call(this);
+    // Не обновляем анимации если игра на паузе
+    if (SceneManager._stopped) {
+        return;
+    }
 
-    // Анимация ауры
-    if (this._auraSprite) {
-        this._auraFrame = (this._auraFrame || 0) + 1;
-        var pulse = 1 + Math.sin(this._auraFrame / 25) * 0.15;
-        this._auraSprite.scale.x = pulse;
-        this._auraSprite.scale.y = pulse;
-        this._auraSprite.rotation += 0.015;
+    try {
+        Sprite_Actor.prototype.update.call(this);
+
+        // Анимация ауры
+        if (this._auraSprite) {
+            this._auraFrame = (this._auraFrame || 0) + 1;
+            var pulse = 1 + Math.sin(this._auraFrame / 25) * 0.15;
+            this._auraSprite.scale.x = pulse;
+            this._auraSprite.scale.y = pulse;
+            this._auraSprite.rotation += 0.015;
+        }
+    } catch (e) {
+        console.error('[ACTPO-EA] Error in sprite update:', e);
     }
 };
 
