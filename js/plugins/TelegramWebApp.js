@@ -13,6 +13,15 @@
  */
 
 (function () {
+    // Polyfill for TelegramGameProxy to prevent errors in some Telegram clients
+    if (!window.TelegramGameProxy) {
+        window.TelegramGameProxy = {
+            receiveEvent: function () {
+                // console.log('TelegramGameProxy.receiveEvent called (polyfilled)');
+            }
+        };
+    }
+
     var _Scene_Boot_start = Scene_Boot.prototype.start;
     Scene_Boot.prototype.start = function () {
         _Scene_Boot_start.call(this);
