@@ -1558,8 +1558,10 @@ Bitmap.prototype._drawTextBody = function (text, tx, ty, maxWidth) {
  * @private
  */
 Bitmap.prototype._onLoad = function () {
-    this._image.removeEventListener('load', this._loadListener);
-    this._image.removeEventListener('error', this._errorListener);
+    if (this._image) {
+        this._image.removeEventListener('load', this._loadListener);
+        this._image.removeEventListener('error', this._errorListener);
+    }
 
     this._renewCanvas();
 
@@ -1629,8 +1631,10 @@ Bitmap.prototype._callLoadListeners = function () {
  * @private
  */
 Bitmap.prototype._onError = function () {
-    this._image.removeEventListener('load', this._loadListener);
-    this._image.removeEventListener('error', this._errorListener);
+    if (this._image) {
+        this._image.removeEventListener('load', this._loadListener);
+        this._image.removeEventListener('error', this._errorListener);
+    }
     this._loadingState = 'error';
 };
 
